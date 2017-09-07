@@ -1,0 +1,1 @@
+./main.js --home="http://www.oricon.co.jp/news/$1/photo/1/" --out="~/Dropbox/Idols/temp/oricon/$1/" --page-pattern='.photo_thumbs a.current' --next-pattern='.main_photo a.main_photo_next'  --save-pattern='.main_photo_image img' --ignore-history=1
