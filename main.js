@@ -319,7 +319,15 @@ BlogSync.fetch = function (url, savePatterns, nextPattern, pagerUrl, titlePatter
                                 }
                                 // TODO: otherwise?
                             } else {
-                                href = Url.resolve(base, $(this).attr("href"));
+                                // href = Url.resolve(base, $(this).attr("href"));
+
+                                href = $(this).attr("href");
+                                // handle "../xxx" in href
+                                var matches = href.match(/^((\.\.\/)+)(.*?)\/?/);
+                                if (matches) {
+                                    href = urlObj.path + href;
+                                }
+                                href = Url.resolve(base, href);
                             }
                             BlogSync.fetch(href, savePatterns, nextPattern, pagerUrl, titlePattern, willFetchCallback, saveCallback, savePageCallback);
                             break;
