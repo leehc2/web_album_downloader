@@ -88,6 +88,11 @@ BlogSync.download = function(url, dest, cb, headers) {
         return;
     }
 
+    if (ARGV['update-data-only']) {
+        if (cb) cb(true, dest + ' (skipped save)');
+        return;
+    }
+
     var urlObj = Url.parse(url);
     var options = {
         protocol: urlObj.protocol,
@@ -348,7 +353,7 @@ BlogSync.fetch = function (url, savePatterns, nextPattern, pagerUrl, titlePatter
 
 var ARGV = ParseArgs(process.argv.slice(2), {
     string: ['home', 'out', 'page-pattern', 'next-pattern', 'pager-url', 'save-pattern', 'ignore-query', 'title-pattern', 'next-filter-pattern', 'pager-page-pattern', 'data-file', 'sleep'],
-    boolean: [ 'stop-early', 'no-revisit', 'folderize', 'ignore-history', 'save-page', 'folder-uses-pathname', 'no-redirect' ]
+    boolean: [ 'stop-early', 'no-revisit', 'folderize', 'ignore-history', 'save-page', 'folder-uses-pathname', 'no-redirect', 'update-data-only' ]
 });
 console.dir(ARGV);
 
@@ -477,6 +482,17 @@ BlogSync.traverse(homeObj.href, ARGV['page-pattern'], function (page) {
             Mkdirp.sync(savePath);
             savePath = Path.resolve(savePath, sanitize(title) + ".html");
 
+            if (ARGV['update-data-only']) {
+                console.log("\t\tPAGE SAVE SKIPPED: " + savePath);
+                if (!ARGV['ignore-history']) {
+                    writeDataFileLater(DATAFILE, JSON.stringify(DATA));
+                }
+                return;
+            }
+
+            if (fileExists(savePath)) {
+                savePath = Path.join(Path.dirname(savePath), Path.basename(savePath, Path.extname(savePath)) + '.' + Uuid.v4() + Path.extname(savePath));
+            }
             FS.writeFile(savePath, content, function (err) {
                 if (err) throw err;
                 console.log("\t\tPAGE SAVED: " + savePath);
