@@ -138,6 +138,7 @@ BlogSync.download = function(url, dest, cb, headers) {
 BlogSync.traverse = function (home, pattern, callback) {
     if (!pattern) {
         // if no home page pattern just start with this page as the first child page
+        console.log("No home page pattern, start as first child page: ", home, "\n");
         callback(home);
     }
 
@@ -370,20 +371,29 @@ if (ARGV['data-file']) {
 
 var tilde = require('tilde-expansion');
 tilde(ARGV['out'], function(s) { ARGV['out'] = s; });
-var Mkdirp = require('mkdirp');
-Mkdirp.sync(ARGV['out']);
+if (ARGV['out']) {
+    var Mkdirp = require('mkdirp');
+    Mkdirp.sync(ARGV['out']);
+}
 
 // TODO: Validate patterns.
 
 //////////////////////////////////////////////////
 
-var DATASTR = FS.readFileSync(DATAFILE, { encoding: 'utf8', flag: 'rs+' });
+var DATASTR = FS.readFileSync(DATAFILE, { encoding: 'utf8', flag: 'rs+' }).trim();
 var DATA = DATASTR ? JSON.parse(DATASTR) : {};
 if (ARGV['ignore-history']) {
     DATA = {};
 }
 
-var homeObj = Url.parse(ARGV['home']);
+if (Array.isArray(ARGV['home'])) {
+    ARGV['home'] = ARGV['home'][ARGV['home'].length - 1];
+}
+var homeObj = Url.parse(ARGV['home'] || "");
+if (!homeObj.href) {
+    console.log("Invalid params, use help?");
+    process.exit();
+}
 console.log("HOME: " + homeObj.href);
 
 var title = Path.basename(ARGV['out'] || homeObj.pathname);
@@ -449,7 +459,7 @@ BlogSync.traverse(homeObj.href, ARGV['page-pattern'], function (page) {
             if (ARGV['folderize'] && title) {
                 var sanitize = require("sanitize-filename");
                 title = title.replace(/\n/g, ' - ');
-                var folder = sanitize(title);
+                var folder = sanitize(title).substring(0,40);
                 savePath = Path.resolve(ARGV['out'], folder);
             }
             var Mkdirp = require('mkdirp');
@@ -480,7 +490,7 @@ BlogSync.traverse(homeObj.href, ARGV['page-pattern'], function (page) {
             }
             var Mkdirp = require('mkdirp');
             Mkdirp.sync(savePath);
-            savePath = Path.resolve(savePath, sanitize(title) + ".html");
+            savePath = Path.resolve(savePath, sanitize(title).substring(0,40) + ".html");
 
             if (ARGV['update-data-only']) {
                 console.log("\t\tPAGE SAVE SKIPPED: " + savePath);
@@ -490,16 +500,20 @@ BlogSync.traverse(homeObj.href, ARGV['page-pattern'], function (page) {
                 return;
             }
 
-            if (fileExists(savePath)) {
-                savePath = Path.join(Path.dirname(savePath), Path.basename(savePath, Path.extname(savePath)) + '.' + Uuid.v4() + Path.extname(savePath));
-            }
-            FS.writeFile(savePath, content, function (err) {
-                if (err) throw err;
-                console.log("\t\tPAGE SAVED: " + savePath);
-                if (!ARGV['ignore-history']) {
-                    writeDataFileLater(DATAFILE, JSON.stringify(DATA));
+            try {
+                if (fileExists(savePath)) {
+                    savePath = Path.join(Path.dirname(savePath), Path.basename(savePath, Path.extname(savePath)) + '.' + Uuid.v4() + Path.extname(savePath));
                 }
-            });
+                FS.writeFile(savePath, content, function (err) {
+                    if (err) throw err;
+                    console.log("\t\tPAGE SAVED: " + savePath);
+                    if (!ARGV['ignore-history']) {
+                        writeDataFileLater(DATAFILE, JSON.stringify(DATA));
+                    }
+                });
+            } catch (e) {
+                return;
+            }
         } : null)
     );
 });
