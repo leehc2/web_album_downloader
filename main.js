@@ -93,7 +93,7 @@ BlogSync.download = function(url, dest, cb, headers) {
         return;
     }
 
-    var urlObj = Url.parse(url);
+    var urlObj = Url.parse(fixUrl(url));
     var options = {
         protocol: urlObj.protocol,
         hostname: urlObj.hostname,
@@ -114,7 +114,8 @@ BlogSync.download = function(url, dest, cb, headers) {
         file.on('finish', function() {
             file.close(function () {
                 var touch = require("touch");
-                touch(dest, { mtime: new Date(response.headers['last-modified'] || Date.now()) });
+                var lastMod = response.headers['last-modified'] || Date.now();
+                touch(dest, { mtime: new Date(lastMod) });
                 if (!Path.extname(dest).match(/jpg|jpeg|gif|png|bmp|pdf/i)) {
                     var mime = response.headers['content-type'];
                     var ext = '.' + Mime.extension(mime);
