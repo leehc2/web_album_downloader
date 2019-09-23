@@ -114,7 +114,7 @@ BlogSync.download = function(url, dest, cb, headers) {
         file.on('finish', function() {
             file.close(function () {
                 var touch = require("touch");
-                touch(dest, { mtime: new Date(response.headers['last-modified']) });
+                touch(dest, { mtime: new Date(response.headers['last-modified'] || Date.now()) });
                 if (!Path.extname(dest).match(/jpg|jpeg|gif|png|bmp|pdf/i)) {
                     var mime = response.headers['content-type'];
                     var ext = '.' + Mime.extension(mime);
@@ -363,6 +363,8 @@ if (ARGV['data-file']) {
     if (!fileExists(DATAFILE)) {
         require("touch").sync(DATAFILE);
     }
+} else {
+    require("touch").sync(DATAFILE);
 }
 
 // if (ARGV['folderize'] && !ARGV['title-pattern']) {
