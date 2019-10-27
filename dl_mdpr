@@ -1,1 +1,1 @@
-./main.js --home="https://mdpr.jp/$2/detail/$1" --out="~/Dropbox/Idols/temp/mdpr/$1/" --page-pattern='.content-moki figure.img a.photo-detail-link' --next-pattern='nav.pager a:last-child'  --save-pattern='figure.main-photo img' --ignore-history=1
+./main.js --home="https://mdpr.jp/$2/detail/$1" --out="~/Dropbox/Idols/temp/mdpr/$1/" --page-pattern='.content-moki figure.img a.photo-detail-link' --next-pattern='nav.pager a:last-child'  --save-pattern='figure.main-photo img' --ignore-history=1 --ignore-query='width,auto,disable'
