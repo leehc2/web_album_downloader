@@ -279,7 +279,11 @@ BlogSync.fetch = function (url, savePatterns, nextPattern, pagerUrl, titlePatter
                         var tagName = $(this).prop("tagName");
                         switch (tagName) {
                             case "A" :
-                                var href = Url.resolve(base, $(this).attr("href"));
+                                var attr_href = $(this).attr("href");
+                                if (attr_href === undefined || attr_href === null) {
+                                    break;
+                                }
+                                var href = Url.resolve(base, attr_href);
                                 if (Path.extname(Url.parse(href).pathname).match(/(gif|jpg|jpeg|png|bmp|pdf)$/i)) {
                                     saveCallback(href, title, headers);
                                 } else {
@@ -287,7 +291,11 @@ BlogSync.fetch = function (url, savePatterns, nextPattern, pagerUrl, titlePatter
                                 }
                                 break;
                             case "IMG" :
-                                var src = Url.resolve(base, $(this).attr("src"));
+                                var attr_src = $(this).attr("src");
+                                if (attr_src === undefined || attr_src === null) {
+                                    break;
+                                }
+                                var src = Url.resolve(base, attr_src);
                                 if (Path.extname(Url.parse(src).pathname).match(/(gif|jpg|jpeg|png|bmp|pdf|php)$/i)) {
                                     saveCallback(src, title, headers);
                                 }
