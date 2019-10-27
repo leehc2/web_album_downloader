@@ -362,7 +362,7 @@ BlogSync.fetch = function (url, savePatterns, nextPattern, pagerUrl, titlePatter
 //////////////////////////////////////////////////
 
 var ARGV = ParseArgs(process.argv.slice(2), {
-    string: ['home', 'out', 'page-pattern', 'next-pattern', 'pager-url', 'save-pattern', 'ignore-query', 'title-pattern', 'next-filter-pattern', 'pager-page-pattern', 'data-file', 'sleep'],
+    string: ['home', 'out', 'page-pattern', 'next-pattern', 'pager-url', 'save-pattern', 'ignore-query', 'title-pattern', 'next-filter-pattern', 'pager-page-pattern', 'data-file', 'sleep', 'replace-filename-pattern', 'replace-filename-replacement'],
     boolean: [ 'stop-early', 'no-revisit', 'folderize', 'ignore-history', 'save-page', 'folder-uses-pathname', 'no-redirect', 'update-data-only' ]
 });
 console.dir(ARGV);
@@ -463,6 +463,11 @@ BlogSync.traverse(homeObj.href, ARGV['page-pattern'], function (page) {
         function (url, title, headers) {
             if (DATA_SAVES[url]) {
                 return;
+            }
+
+            if (ARGV['replace-filename-pattern'] && ARGV['replace-filename-replacement']) {
+                var regexp = new RegExp(ARGV['replace-filename-pattern'], "i");
+                url = url.replace(regexp, ARGV['replace-filename-replacement']);
             }
 
             var urlObj = Url.parse(fixUrl(url));
